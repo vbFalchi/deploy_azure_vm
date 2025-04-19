@@ -74,3 +74,27 @@ resource "azurerm_linux_virtual_machine" "vm" {
   priority       = "Regular"
   provision_vm_agent = true
 }
+
+module "ansible_nodes" {
+  source = "./modules/linux_vm"
+
+  for_each = {
+    "vanfalchi-ansible-node-1" = {
+      size    = "Standard_B1s"
+      disk    = "StandardSSD_LRS"
+    }
+    "vanfalchi-ansible-node-2" = {
+      size    = "Standard_B1s"
+      disk    = "StandardSSD_LRS"
+    }
+  }
+
+  name                = each.key
+  location            = var.location
+  resource_group_name = azurerm_resource_group.rg.name
+  subnet_id           = azurerm_subnet.subnet.id
+  vm_size             = each.value.size
+  os_disk_type        = each.value.disk
+  admin_username      = var.admin_username
+  admin_password      = var.admin_password
+}
